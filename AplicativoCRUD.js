@@ -8,7 +8,8 @@ import {
     FlatList,
     Modal,
     TouchableOpacity,
-    StyleSheet
+    StyleSheet,
+    Alert
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -17,17 +18,21 @@ const URL_BASE = 'https://ca4fce58f062a7a9ad45.free.beeceptor.com/api/books';
 const AplicativoCRUD = () => {
     const [listaItens, setListaItens] = useState([]);
     const [novoNome, setNovoNome] = useState('');
+    const [novoAutor, setNovoAutor] = useState('');
+    const [novoAno, setNovoAno] = useState('');
+    const [novoGenero, setNovoGenero] = useState('');
+    const [novaDescricao, setNovaDescricao] = useState('');
+
     const [itemSelecionado, setItemSelecionado] = useState(null);
-    const [nomeAtualizado, setNomeAtualizado] = useState('');
     const [modalVisivel, setModalVisivel] = useState(false);
 
     useEffect(() => {
         buscarItens();
     }, []);
+
     const buscarItens = async () => {
         try {
             const resposta = await axios.get(`${URL_BASE}/itens`);
-            console.log('Resposta da API:', resposta.data);
             setListaItens(resposta.data);
         } catch (erro) {
             console.error('Erro ao buscar itens:', erro);
@@ -35,35 +40,32 @@ const AplicativoCRUD = () => {
     };
 
     const adicionarItem = async () => {
+        if (!novoNome || !novoAutor || !novoAno || !novoGenero || !novaDescricao) {
+            Alert.alert('Erro', 'Por favor, preencha todos os campos.');
+            return;
+        }
+
         try {
             const novoItem = {
                 id: Date.now(),
-                name: novoNome
+                name: novoNome,
+                author: novoAutor,
+                year: novoAno,
+                genre: novoGenero,
+                description: novaDescricao,
             };
             await axios.post(`${URL_BASE}/itens`, novoItem);
             buscarItens();
             setNovoNome('');
+            setNovoAutor('');
+            setNovoAno('');
+            setNovoGenero('');
+            setNovaDescricao('');
         } catch (erro) {
             console.error('Erro ao adicionar item:', erro);
         }
     };
-    const abrirModalEdicao = (item) => {
-        setItemSelecionado(item);
-        setNomeAtualizado(item.name);
-        setModalVisivel(true);
-    };
-    const editarItem = async () => {
-        try {
-            await axios.put(`${URL_BASE}/itens/${itemSelecionado.id}`, {
-                id: itemSelecionado.id,
-                name: nomeAtualizado,
-            });
-            buscarItens();
-            setModalVisivel(false);
-        } catch (erro) {
-            console.error('Erro ao atualizar item:', erro);
-        }
-    };
+
     const removerItem = async (id) => {
         try {
             await axios.delete(`${URL_BASE}/itens/${id}`);
@@ -75,59 +77,41 @@ const AplicativoCRUD = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.titulo}>Cadastrar Novo Item</Text>
-            <TextInput
-                placeholder="Digite o nome do item"
-                value={novoNome}
-                onChangeText={setNovoNome}
-                style={styles.input}
-            />
+            <Text style={styles.titulo}>Cadastrar Novo Livro</Text>
+            <TextInput placeholder="Título" value={novoNome} onChangeText={setNovoNome} style={styles.input} />
+            <TextInput placeholder="Autor" value={novoAutor} onChangeText={setNovoAutor} style={styles.input} />
+            <TextInput placeholder="Ano" value={novoAno} onChangeText={setNovoAno} keyboardType="numeric" style={styles.input} />
+            <TextInput placeholder="Gênero" value={novoGenero} onChangeText={setNovoGenero} style={styles.input} />
+            <TextInput placeholder="Descrição" value={novaDescricao} onChangeText={setNovaDescricao} style={styles.input} />
             <Button title="Adicionar" onPress={adicionarItem} />
-            <Text style={styles.titulo}>Itens Cadastrados</Text>
+
+            <Text style={styles.titulo}>Livros Cadastrados</Text>
             <FlatList
                 data={listaItens}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => (
                     <View style={styles.itemContainer}>
-                        <Text style={styles.itemTexto}>{item.name}</Text>
-                        <View style={styles.botoes}>
-                            <TouchableOpacity onPress={() => abrirModalEdicao(item)}>
-                                <Icon name="edit" size={24} color="#007AFF" />
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => removerItem(item.id)}
-                                style={{ marginLeft: 15 }}>
+                        <Text style={styles.itemTexto}>{item.name} - {item.author} ({item.year})</Text>
+                        <Text style={styles.itemTextoSec}>{item.genre} - {item.description}</Text>
+                        <View style={styles.botoes}>                            
+                            <TouchableOpacity onPress={() => removerItem(item.id)}>
                                 <Icon name="delete" size={24} color="#FF3B30" />
                             </TouchableOpacity>
                         </View>
                     </View>
                 )}
             />
-            <Modal visible={modalVisivel} animationType="slide" transparent>
-                <View style={styles.modalFundo}>
-                    <View style={styles.modalConteudo}>
-                        <Text style={styles.titulo}>Editar Item</Text>
-                        <TextInput
-                            value={nomeAtualizado}
-                            onChangeText={setNomeAtualizado}
-                            style={styles.input}
-                        />
-                        <Button title="Salvar Alterações" onPress={editarItem} />
-                        <View style={{ marginTop: 10 }}></View>
-                        <Button title="Cancelar" color="gray" onPress={() =>
-                            setModalVisivel(false)} />
-                    </View>
-                </View>
-            </Modal >
-        </View >
+        </View>
     );
 };
+
 export default AplicativoCRUD;
 
 const styles = StyleSheet.create({
     container: {
         padding: 20,
         flex: 1,
-        backgroundColor: '#fff'
+        backgroundColor: '#fff',
     },
     titulo: {
         fontSize: 18,
@@ -137,38 +121,27 @@ const styles = StyleSheet.create({
     input: {
         borderWidth: 1,
         padding: 8,
-        marginVertical: 10,
+        marginVertical: 5,
         borderRadius: 5,
         borderColor: '#ccc',
     },
-    temContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 12,
+    itemContainer: {
         backgroundColor: '#f2f2f2',
+        padding: 12,
         marginVertical: 5,
         borderRadius: 5,
     },
     itemTexto: {
         fontSize: 16,
-        flex: 1,
+        fontWeight: 'bold',
+    },
+    itemTextoSec: {
+        fontSize: 14,
+        color: '#555',
     },
     botoes: {
         flexDirection: 'row',
-        alignItems: 'center',
-    },
-    modalFundo: {
-        flex: 1,
-        backgroundColor: '#000000aa',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    modalConteudo: {
-        backgroundColor: '#fff',
-        padding: 20,
-        width: '90%',
-        borderRadius: 10,
-        elevation: 5,
+        marginTop: 5,
+        justifyContent: 'flex-end',
     },
 });
