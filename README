@@ -1,0 +1,28 @@
+# 📚 Aplicativo CRUD com React Native
+
+Este é um aplicativo simples de cadastro de itens (ex: livros), desenvolvido em **React Native** com integração a uma API mock via **Beeceptor**. Ele permite:
+
+- ✅ Listar itens
+- ➕ Adicionar novos itens
+- ✏️ Editar itens existentes
+- 🗑️ Remover itens
+
+## 🚀 Tecnologias Utilizadas
+
+- [React Native](https://reactnative.dev/)
+- [Axios](https://axios-http.com/)
+- [Beeceptor](https://beeceptor.com/) (para simulação da API REST)
+- [react-native-vector-icons](https://github.com/oblador/react-native-vector-icons)
+
+## 🔧 Como Executar
+
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/seu-usuario/seu-repo.git
+   cd seu-repo
+
+2. Instale as dependências
+    npm install
+
+3. Execute
+    npx expo start --tunnel
