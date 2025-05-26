@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const URL_BASE = 'https://ca4fce58f062a7a9ad45.free.beeceptor.com/api/books';
+const URL_BASE = 'https://ca5b7ed680fb9fe62548.free.beeceptor.com/api';
 
 const AplicativoCRUD = () => {
     const [listaItens, setListaItens] = useState([]);
@@ -32,7 +32,7 @@ const AplicativoCRUD = () => {
 
     const buscarItens = async () => {
         try {
-            const resposta = await axios.get(`${URL_BASE}/itens`);
+            const resposta = await axios.get(`${URL_BASE}/books`);
             setListaItens(resposta.data);
         } catch (erro) {
             console.error('Erro ao buscar itens:', erro);
@@ -54,7 +54,7 @@ const AplicativoCRUD = () => {
                 genre: novoGenero,
                 description: novaDescricao,
             };
-            await axios.post(`${URL_BASE}/itens`, novoItem);
+            await axios.post(`${URL_BASE}/books`, novoItem);
             buscarItens();
             setNovoNome('');
             setNovoAutor('');
@@ -68,7 +68,7 @@ const AplicativoCRUD = () => {
 
     const removerItem = async (id) => {
         try {
-            await axios.delete(`${URL_BASE}/itens/${id}`);
+            await axios.delete(`${URL_BASE}/books/${id}`);
             buscarItens();
         } catch (erro) {
             console.error('Erro ao remover item:', erro);
